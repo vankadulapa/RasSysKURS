@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Оргтехника')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar('equipment')}"></header>
+
+<main class="container">
+    <div class="page-head">
+        <div>
+            <h1>Оргтехника</h1>
+            <div class="subtitle">Компьютеры, периферия и сетевое оборудование</div>
+        </div>
+        <a th:if="${canEdit}" th:href="@{/equipment/new}" class="btn btn-primary">+ Добавить технику</a>
+    </div>
+
+    <section class="stats">
+        <div class="stat total"><div class="num" th:text="${statTotal}">0</div><div class="label">Всего единиц</div></div>
+        <div class="stat"><div class="num" th:text="${statInUse}">0</div><div class="label">Используется</div></div>
+        <div class="stat stock"><div class="num" th:text="${statInStock}">0</div><div class="label">На складе</div></div>
+        <div class="stat repair"><div class="num" th:text="${statInRepair}">0</div><div class="label">В ремонте</div></div>
+    </section>
+
+    <section class="card">
+        <form th:action="@{/equipment}" method="get" class="toolbar">
+            <input type="text" name="q" th:value="${q}" class="grow"
+                   placeholder="Поиск: название, инв. №, IP, MAC, расположение">
+            <select name="status">
+                <option value="">Все статусы</option>
+                <option th:each="s : ${statuses}" th:value="${s}" th:text="${statusLabels.get(s)}"
+                        th:selected="${s == status}"></option>
+            </select>
+            <button type="submit" class="btn btn-primary">Найти</button>
+            <a class="btn btn-ghost" th:href="@{/equipment}">Сбросить</a>
+        </form>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Инв. №</th>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Статус</th>
+                        <th>IP</th>
+                        <th>MAC</th>
+                        <th>Владелец</th>
+                        <th>Расположение</th>
+                        <th th:if="${canEdit}">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(items)}">
+                        <td colspan="9" class="empty">Ничего не найдено</td>
+                    </tr>
+                    <tr th:each="e : ${items}">
+                        <td class="mono" th:text="${e.inventoryNumber}"></td>
+                        <td><b th:text="${e.name}"></b></td>
+                        <td th:text="${e.type.name}"></td>
+                        <td><span class="badge" th:classappend="${'badge-' + e.status}"
+                                  th:text="${statusLabels.get(e.status)}"></span></td>
+                        <td class="mono" th:text="${e.ipAddress} ?: '—'"></td>
+                        <td class="mono" th:text="${e.macAddress} ?: '—'"></td>
+                        <td th:text="${e.owner?.fullName} ?: '—'"></td>
+                        <td th:text="${e.location} ?: '—'"></td>
+                        <td th:if="${canEdit}">
+                            <div class="actions">
+                                <a class="btn btn-ghost btn-sm"
+                                   th:href="@{/equipment/{id}/edit(id=${e.id})}">Изменить</a>
+                                <form th:action="@{/equipment/{id}/delete(id=${e.id})}" method="post"
+                                      onsubmit="return confirm('Удалить эту технику?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

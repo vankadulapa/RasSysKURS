@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Вход')}"></head>
+<body class="login-page">
+    <main class="login-card">
+        <div class="login-logo">🖥</div>
+        <h1>Учёт ПК и оргтехники</h1>
+        <p class="muted">Войдите в свою учётную запись</p>
+
+        <div class="alert alert-err" th:if="${param.error}">
+            Неверный логин или пароль, либо учётная запись отключена
+        </div>
+        <div class="alert alert-ok" th:if="${param.logout}">Вы вышли из системы</div>
+
+        <form th:action="@{/login}" method="post">
+            <div class="field">
+                <label>Логин</label>
+                <input type="text" name="username" autofocus required>
+            </div>
+            <div class="field">
+                <label>Пароль</label>
+                <input type="password" name="password" required>
+            </div>
+            <label class="check" style="margin-bottom: 16px;">
+                <input type="checkbox" name="remember-me">
+                <span>Запомнить меня на 14 дней</span>
+            </label>
+            <button class="btn btn-primary btn-block" type="submit">Войти</button>
+        </form>
+    </main>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Отчёты')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar('reports')}"></header>
+
+<main class="container">
+    <div class="page-head no-print">
+        <div>
+            <h1>Отчёты</h1>
+            <div class="subtitle">Сводки по технике для просмотра и печати</div>
+        </div>
+        <button type="button" class="btn btn-primary" onclick="window.print()">Печать</button>
+    </div>
+
+    <nav class="tabs no-print">
+        <a class="tab" th:classappend="${type == 'departments'} ? 'active'"
+           th:href="@{/reports(type='departments')}">По подразделениям</a>
+        <a class="tab" th:classappend="${type == 'types'} ? 'active'"
+           th:href="@{/reports(type='types')}">По типам</a>
+        <a class="tab" th:classappend="${type == 'network'} ? 'active'"
+           th:href="@{/reports(type='network')}">Сетевой реестр</a>
+        <a class="tab" th:classappend="${type == 'unassigned'} ? 'active'"
+           th:href="@{/reports(type='unassigned')}">Без владельца</a>
+        <a class="tab" th:classappend="${type == 'old'} ? 'active'"
+           th:href="@{/reports(type='old')}">Старше N лет</a>
+    </nav>
+
+    <section class="card">
+        <h2 class="section-title" th:text="${title}"></h2>
+        <div class="print-only muted">Дата формирования: <span th:text="${today}"></span></div>
+
+        <form th:if="${type == 'old'}" th:action="@{/reports}" method="get" class="toolbar no-print">
+            <input type="hidden" name="type" value="old">
+            <span>Возраст техники старше</span>
+            <input type="number" name="years" th:value="${years}" min="0" max="50" style="width:90px">
+            <span>лет</span>
+            <button type="submit" class="btn btn-primary">Показать</button>
+        </form>
+
+        <div class="table-wrap" th:if="${type == 'departments' or type == 'types'}">
+            <table>
+                <thead>
+                    <tr>
+                        <th th:text="${type == 'departments'} ? 'Подразделение' : 'Тип техники'"></th>
+                        <th>Всего</th>
+                        <th>Используется</th>
+                        <th>На складе</th>
+                        <th>В ремонте</th>
+                        <th>Списано</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="r : ${rows}" th:classappend="${r.name == 'Итого'} ? 'total-row'">
+                        <td th:text="${r.name}"></td>
+                        <td th:text="${r.total}"></td>
+                        <td th:text="${r.inUse}"></td>
+                        <td th:text="${r.inStock}"></td>
+                        <td th:text="${r.inRepair}"></td>
+                        <td th:text="${r.writtenOff}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-wrap" th:if="${type == 'network' or type == 'unassigned' or type == 'old'}">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Инв. №</th>
+                        <th>Название</th>
+                        <th>Тип</th>
+                        <th>Статус</th>
+                        <th>IP</th>
+                        <th>MAC</th>
+                        <th>Владелец</th>
+                        <th>Расположение</th>
+                        <th th:if="${type == 'old'}">Дата покупки</th>
+                        <th th:if="${type == 'old'}">Возраст, лет</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${#lists.isEmpty(items)}">
+                        <td colspan="10" class="empty">Нет данных для отчёта</td>
+                    </tr>
+                    <tr th:each="e : ${items}">
+                        <td class="mono" th:text="${e.inventoryNumber}"></td>
+                        <td><b th:text="${e.name}"></b></td>
+                        <td th:text="${e.type.name}"></td>
+                        <td><span class="badge" th:classappend="${'badge-' + e.status}"
+                                  th:text="${statusLabels.get(e.status)}"></span></td>
+                        <td class="mono" th:text="${e.ipAddress} ?: '—'"></td>
+                        <td class="mono" th:text="${e.macAddress} ?: '—'"></td>
+                        <td th:text="${e.owner?.fullName} ?: '—'"></td>
+                        <td th:text="${e.location} ?: '—'"></td>
+                        <td th:if="${type == 'old'}" th:text="${e.purchaseDate}"></td>
+                        <td th:if="${type == 'old'}" th:text="${ages.get(e.id)}"></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="muted">Записей: <b th:text="${#lists.size(items)}"></b></p>
+        </div>
+    </section>
+</main>
+</body>
+</html>

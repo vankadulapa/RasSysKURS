@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Пользователи')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar('users')}"></header>
+
+<main class="container">
+    <div class="page-head">
+        <div>
+            <h1>Пользователи</h1>
+            <div class="subtitle">Учётные записи, роли доступа и привязка к сотрудникам</div>
+        </div>
+    </div>
+
+    <div class="alert alert-ok" th:if="${message}" th:text="${message}"></div>
+    <div class="alert alert-err" th:if="${error}" th:text="${error}"></div>
+
+    <section class="card">
+        <h2 class="section-title">Новый пользователь</h2>
+        <form th:action="@{/admin/users/create}" method="post" class="toolbar" style="margin-bottom:0">
+            <input type="text" name="username" placeholder="Логин" required>
+            <input type="password" name="password" placeholder="Пароль (от 6 символов)" required>
+            <select name="roleId">
+                <option th:each="r : ${roles}" th:value="${r.id}"
+                        th:text="${r.name} + ' — ' + ${r.description}"></option>
+            </select>
+            <select name="employeeId">
+                <option value="">Сотрудник: не привязан</option>
+                <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="${emp.fullName}"></option>
+            </select>
+            <button type="submit" class="btn btn-primary">Создать</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2 class="section-title">Список пользователей</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Логин</th><th>Роль</th><th>Сотрудник</th><th>Статус</th><th>Действия</th></tr>
+                </thead>
+                <tbody>
+                    <tr th:each="u : ${users}">
+                        <td><b th:text="${u.username}"></b></td>
+                        <td>
+                            <form th:if="${u.username != currentUser}" class="inline-form"
+                                  th:action="@{/admin/users/{id}/role(id=${u.id})}" method="post">
+                                <select name="roleId">
+                                    <option th:each="r : ${roles}" th:value="${r.id}" th:text="${r.name}"
+                                            th:selected="${r.id == u.role.id}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-ghost btn-sm">Сменить</button>
+                            </form>
+                            <span th:if="${u.username == currentUser}" class="badge badge-role"
+                                  th:text="${u.role.name}"></span>
+                        </td>
+                        <td>
+                            <form class="inline-form"
+                                  th:action="@{/admin/users/{id}/employee(id=${u.id})}" method="post">
+                                <select name="employeeId">
+                                    <option value="">— не привязан —</option>
+                                    <option th:each="emp : ${employees}" th:value="${emp.id}"
+                                            th:text="${emp.fullName}"
+                                            th:selected="${u.employee != null and emp.id == u.employee.id}"></option>
+                                </select>
+                                <button type="submit" class="btn btn-ghost btn-sm">Сохранить</button>
+                            </form>
+                        </td>
+                        <td>
+                            <span class="badge" th:classappend="${u.active} ? 'badge-on' : 'badge-off'"
+                                  th:text="${u.active} ? 'Активен' : 'Отключён'"></span>
+                        </td>
+                        <td>
+                            <span th:if="${u.username == currentUser}" class="muted">это вы</span>
+                            <div class="actions" th:if="${u.username != currentUser}">
+                                <form th:action="@{/admin/users/{id}/toggle(id=${u.id})}" method="post">
+                                    <button type="submit" class="btn btn-ghost btn-sm"
+                                            th:text="${u.active} ? 'Отключить' : 'Включить'"></button>
+                                </form>
+                                <form th:action="@{/admin/users/{id}/delete(id=${u.id})}" method="post"
+                                      onsubmit="return confirm('Удалить пользователя?');">
+                                    <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+</body>
+</html>

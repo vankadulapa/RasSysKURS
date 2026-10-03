@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Документы')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar('documents')}"></header>
+
+<main class="container">
+    <div class="page-head">
+        <div>
+            <h1>Документы</h1>
+            <div class="subtitle">Печатные формы: накладная на передачу и акт на списание</div>
+        </div>
+    </div>
+
+    <div class="alert alert-err" th:if="${error}" th:text="${error}"></div>
+
+    <nav class="tabs">
+        <a class="tab" th:classappend="${type == 'waybill'} ? 'active'"
+           th:href="@{/documents(type='waybill')}">Накладная на передачу</a>
+        <a class="tab" th:classappend="${type == 'writeoff'} ? 'active'"
+           th:href="@{/documents(type='writeoff')}">Акт на списание</a>
+    </nav>
+
+    <form th:action="@{/documents/print}" method="post" target="_blank"
+          onsubmit="if(!document.querySelector('input[name=ids]:checked')){alert('Выберите хотя бы одну единицу техники');return false;}">
+        <input type="hidden" name="type" th:value="${type}">
+
+        <section class="card">
+            <h2 class="section-title"
+                th:text="${type == 'waybill'} ? 'Реквизиты накладной' : 'Реквизиты акта'"></h2>
+            <div class="form-grid">
+                <div class="field">
+                    <label>Номер документа</label>
+                    <input type="text" name="number" placeholder="Если пусто, присвоится автоматически">
+                </div>
+                <div class="field">
+                    <label>Дата</label>
+                    <input type="date" name="date" th:value="${today}" required>
+                </div>
+                <div class="field full">
+                    <label>Организация</label>
+                    <input type="text" name="org" placeholder="Название организации">
+                </div>
+
+                <div class="field" th:if="${type == 'waybill'}">
+                    <label>Кто сдаёт</label>
+                    <select name="fromId">
+                        <option value="">— не указан —</option>
+                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="${emp.fullName}"
+                                th:selected="${meEmployeeId != null and emp.id == meEmployeeId}"></option>
+                    </select>
+                </div>
+                <div class="field" th:if="${type == 'waybill'}">
+                    <label>Кто принимает</label>
+                    <select name="toId" required>
+                        <option value="">— выберите —</option>
+                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="${emp.fullName}"></option>
+                    </select>
+                </div>
+
+                <div class="field" th:if="${type == 'writeoff'}">
+                    <label>Председатель комиссии</label>
+                    <select name="chairmanId">
+                        <option value="">— не указан —</option>
+                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="${emp.fullName}"></option>
+                    </select>
+                </div>
+                <div class="field" th:if="${type == 'writeoff'}">
+                    <label>Член комиссии 1</label>
+                    <select name="member1Id">
+                        <option value="">— не указан —</option>
+                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="${emp.fullName}"></option>
+                    </select>
+                </div>
+                <div class="field" th:if="${type == 'writeoff'}">
+                    <label>Член комиссии 2</label>
+                    <select name="member2Id">
+                        <option value="">— не указан —</option>
+                        <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="${emp.fullName}"></option>
+                    </select>
+                </div>
+
+                <div class="field full">
+                    <label th:text="${type == 'waybill'} ? 'Основание' : 'Причина списания'"></label>
+                    <input type="text" name="reason"
+                           th:placeholder="${type == 'waybill'} ? 'Например: перевод в другое подразделение' : 'Например: физический износ, ремонт нецелесообразен'">
+                </div>
+                <div class="field full">
+                    <label class="check">
+                        <input type="checkbox" name="apply" value="true">
+                        <span th:text="${type == 'waybill'}
+                            ? 'Применить в системе: назначить получателя владельцем техники'
+                            : 'Применить в системе: перевести технику в статус «Списано»'"></span>
+                    </label>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2 class="section-title">Выберите технику</h2>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th><input type="checkbox" title="Выбрать все"
+                                       onclick="document.querySelectorAll('input[name=ids]').forEach(c => c.checked = this.checked)"></th>
+                            <th>Инв. №</th>
+                            <th>Название</th>
+                            <th>Тип</th>
+                            <th>Статус</th>
+                            <th>Владелец</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="e : ${items}">
+                            <td><input type="checkbox" name="ids" th:value="${e.id}"></td>
+                            <td class="mono" th:text="${e.inventoryNumber}"></td>
+                            <td><b th:text="${e.name}"></b></td>
+                            <td th:text="${e.type.name}"></td>
+                            <td><span class="badge" th:classappend="${'badge-' + e.status}"
+                                      th:text="${statusLabels.get(e.status)}"></span></td>
+                            <td th:text="${e.owner?.fullName} ?: '—'"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Сформировать документ</button>
+            </div>
+        </section>
+    </form>
+</main>
+</body>
+</html>

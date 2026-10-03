@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' · Учёт оргтехники'">Учёт оргтехники</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header th:fragment="navbar(active)" class="navbar">
+    <div class="brand"><span class="logo">🖥</span><span>Учёт оргтехники</span></div>
+    <nav class="nav-links">
+        <a th:href="@{/equipment}" th:classappend="${active == 'equipment'} ? 'active'">Оргтехника</a>
+        <a th:href="@{/reports}" th:classappend="${active == 'reports'} ? 'active'">Отчёты</a>
+        <a th:if="${canEdit}" th:href="@{/documents}"
+   th:classappend="${active == 'documents'} ? 'active'">Документы</a>
+        <a th:if="${canEdit}" th:href="@{/departments}"
+           th:classappend="${active == 'departments'} ? 'active'">Подразделения</a>
+        <a th:if="${canEdit}" th:href="@{/employees}"
+           th:classappend="${active == 'employees'} ? 'active'">Сотрудники</a>
+        <a th:if="${isAdmin}" th:href="@{/admin/users}"
+           th:classappend="${active == 'users'} ? 'active'">Пользователи</a>
+    </nav>
+    <div class="nav-user">
+        <span class="user-chip" th:text="${username}">user</span>
+        <form th:action="@{/logout}" method="post">
+            <button class="btn btn-ghost btn-sm" type="submit">Выйти</button>
+        </form>
+    </div>
+</header>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${docTitle})}"></head>
+<body>
+<div class="doc-actions">
+    <button type="button" class="btn btn-primary" onclick="window.print()">Печать</button>
+    <button type="button" class="btn btn-ghost" onclick="window.close()">Закрыть</button>
+    <span class="alert alert-ok" th:if="${applied}" style="margin:0">Изменения применены в системе</span>
+</div>
+
+<div class="doc-wrap">
+
+    <!-- ===== Накладная ===== -->
+    <th:block th:if="${type == 'waybill'}">
+        <h1 class="doc-title">Накладная № <span th:text="${number}"></span></h1>
+        <div class="doc-sub">на передачу оргтехники</div>
+        <div class="doc-meta">
+            <span>Организация: <b th:text="${org}"></b></span>
+            <span>Дата: <b th:text="${date}"></b></span>
+        </div>
+        <div class="doc-line">Сдал:
+            <b th:if="${from != null}" th:text="${from.fullName}"></b><span
+               th:if="${from != null and from.position != null}" th:text="', ' + ${from.position}"></span>
+            <span th:if="${from == null}" class="blank"></span>
+        </div>
+        <div class="doc-line">Принял:
+            <b th:if="${to != null}" th:text="${to.fullName}"></b><span
+               th:if="${to != null and to.position != null}" th:text="', ' + ${to.position}"></span>
+            <span th:if="${to == null}" class="blank"></span>
+        </div>
+        <div class="doc-line">Основание: <span th:text="${reason}"></span></div>
+    </th:block>
+
+    <!-- ===== Акт на списание ===== -->
+    <th:block th:if="${type == 'writeoff'}">
+        <div class="doc-approve">
+            УТВЕРЖДАЮ<br>
+            Руководитель <span class="sign-line"></span> / <span class="blank" style="min-width:120px"></span> /<br>
+            «____» ______________ 20___ г.
+        </div>
+        <h1 class="doc-title">Акт № <span th:text="${number}"></span></h1>
+        <div class="doc-sub">о списании оргтехники</div>
+        <div class="doc-meta">
+            <span>Организация: <b th:text="${org}"></b></span>
+            <span>Дата: <b th:text="${date}"></b></span>
+        </div>
+        <div class="doc-line">Комиссия в составе:</div>
+        <div class="doc-line">Председатель:
+            <b th:if="${chairman != null}" th:text="${chairman.fullName}"></b>
+            <span th:if="${chairman == null}" class="blank"></span>
+        </div>
+        <div class="doc-line">Члены комиссии:
+            <b th:if="${member1 != null}" th:text="${member1.fullName}"></b>
+            <span th:if="${member1 == null}" class="blank"></span>,
+            <b th:if="${member2 != null}" th:text="${member2.fullName}"></b>
+            <span th:if="${member2 == null}" class="blank"></span>
+        </div>
+        <div class="doc-line">провела осмотр нижеперечисленной оргтехники и установила, что она подлежит
+            списанию по причине: <b th:text="${reason}"></b>.
+        </div>
+    </th:block>
+
+    <table>
+        <thead>
+            <tr>
+                <th>№</th>
+                <th>Инв. номер</th>
+                <th>Наименование</th>
+                <th>Тип</th>
+                <th>Серийный номер</th>
+                <th>Дата покупки</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="e, st : ${items}">
+                <td th:text="${st.count}"></td>
+                <td th:text="${e.inventoryNumber}"></td>
+                <td th:text="${e.name}"></td>
+                <td th:text="${e.type.name}"></td>
+                <td th:text="${e.serialNumber} ?: '—'"></td>
+                <td th:text="${e.purchaseDate} ?: '—'"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="doc-line">Всего наименований: <b th:text="${#lists.size(items)}"></b></div>
+
+    <div class="doc-sign" th:if="${type == 'waybill'}">
+        <div>Сдал: <span class="sign-line"></span> /
+            <span th:if="${from != null}" th:text="${from.fullName}"></span><span
+                  th:if="${from == null}" class="blank" style="min-width:120px"></span> /</div>
+        <div>Принял: <span class="sign-line"></span> /
+            <span th:if="${to != null}" th:text="${to.fullName}"></span><span
+                  th:if="${to == null}" class="blank" style="min-width:120px"></span> /</div>
+    </div>
+
+    <div class="doc-sign" th:if="${type == 'writeoff'}">
+        <div>Председатель комиссии: <span class="sign-line"></span> /
+            <span th:if="${chairman != null}" th:text="${chairman.fullName}"></span><span
+                  th:if="${chairman == null}" class="blank" style="min-width:120px"></span> /</div>
+        <div>Член комиссии: <span class="sign-line"></span> /
+            <span th:if="${member1 != null}" th:text="${member1.fullName}"></span><span
+                  th:if="${member1 == null}" class="blank" style="min-width:120px"></span> /</div>
+        <div>Член комиссии: <span class="sign-line"></span> /
+            <span th:if="${member2 != null}" th:text="${member2.fullName}"></span><span
+                  th:if="${member2 == null}" class="blank" style="min-width:120px"></span> /</div>
+    </div>
+</div>
+</body>
+</html>

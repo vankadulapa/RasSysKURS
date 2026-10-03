@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Оргтехника')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar('equipment')}"></header>
+
+<main class="container narrow">
+    <div class="page-head">
+        <div>
+            <h1 th:text="${equipment.id == null} ? 'Добавление техники' : 'Редактирование техники'"></h1>
+            <div class="subtitle">Заполните карточку единицы оргтехники</div>
+        </div>
+    </div>
+
+    <form class="card" th:action="@{/equipment/save}" th:object="${equipment}" method="post">
+        <input type="hidden" th:field="*{id}">
+        <div class="form-grid">
+            <div class="field">
+                <label>Инвентарный номер</label>
+                <input type="text" th:field="*{inventoryNumber}" maxlength="30" required>
+            </div>
+            <div class="field">
+                <label>Название</label>
+                <input type="text" th:field="*{name}" maxlength="150" required>
+            </div>
+            <div class="field">
+                <label>Тип</label>
+                <select th:field="*{type.id}" required>
+                    <option value="">— выберите —</option>
+                    <option th:each="t : ${types}" th:value="${t.id}" th:text="${t.name}"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Статус</label>
+                <select th:field="*{status}">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${statusLabels.get(s)}"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Серийный номер</label>
+                <input type="text" th:field="*{serialNumber}" maxlength="60">
+            </div>
+            <div class="field">
+                <label>Дата покупки</label>
+                <input type="date" th:field="*{purchaseDate}">
+            </div>
+            <div class="field">
+                <label>IP-адрес</label>
+                <input type="text" th:field="*{ipAddress}" maxlength="45" placeholder="192.168.1.10">
+            </div>
+            <div class="field">
+                <label>MAC-адрес</label>
+                <input type="text" th:field="*{macAddress}" maxlength="17" placeholder="AA:BB:CC:DD:EE:FF">
+            </div>
+            <div class="field">
+                <label>Владелец</label>
+                <select th:field="*{owner.id}">
+                    <option value="">— нет —</option>
+                    <option th:each="emp : ${employees}" th:value="${emp.id}" th:text="${emp.fullName}"></option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Расположение</label>
+                <input type="text" th:field="*{location}" maxlength="150">
+            </div>
+            <div class="field full">
+                <label>Характеристики</label>
+                <textarea th:field="*{specs}" rows="3"></textarea>
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Сохранить</button>
+            <a class="btn btn-ghost" th:href="@{/equipment}">Отмена</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

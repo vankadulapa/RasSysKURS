@@ -1,0 +1,12 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Ошибка')}"></head>
+<body class="login-page">
+    <main class="login-card" style="text-align:center">
+        <div class="big-code" th:text="${status}">403</div>
+        <h1 th:text="${status == 403} ? 'Доступ запрещён' : (${status == 404} ? 'Страница не найдена' : 'Ошибка запроса')"></h1>
+        <p class="muted" th:text="${status == 403} ? 'У вашей роли нет прав для этого действия.' : 'Проверьте адрес или вернитесь к списку.'"></p>
+        <a class="btn btn-primary" th:href="@{/equipment}">К списку техники</a>
+    </main>
+</body>
+</html>
